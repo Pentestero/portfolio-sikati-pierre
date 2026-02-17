@@ -1,0 +1,167 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap");
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --charcoal: #1a1a1a;
+    --off-white: #f8f8f8;
+    --electric-blue: #0066ff;
+    --dark-blue: #003d99;
+    --slate-gray: #64748b;
+    --light-gray: #e2e8f0;
+
+    --background: #f8f8f8;
+    --foreground: #1a1a1a;
+    --card: #ffffff;
+    --card-foreground: #1a1a1a;
+    --primary: #0066ff;
+    --primary-foreground: #ffffff;
+    --secondary: #e2e8f0;
+    --secondary-foreground: #1a1a1a;
+    --muted: #e2e8f0;
+    --muted-foreground: #64748b;
+    --accent: #0066ff;
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e2e8f0;
+    --ring: #0066ff;
+  }
+
+  .dark {
+    --charcoal: #1a1a1a;
+    --off-white: #f8f8f8;
+    --slate-gray: #94a3b8;
+    --light-gray: #334155;
+
+    --background: #1a1a1a;
+    --foreground: #f8f8f8;
+    --card: #262626;
+    --card-foreground: #f8f8f8;
+    --secondary: #334155;
+    --secondary-foreground: #f8f8f8;
+    --muted: #334155;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+@layer utilities {
+  .text-charcoal {
+    color: var(--charcoal);
+  }
+  .text-off-white {
+    color: var(--off-white);
+  }
+  .text-electric-blue {
+    color: var(--electric-blue);
+  }
+  .text-dark-blue {
+    color: var(--dark-blue);
+  }
+  .text-slate-gray {
+    color: var(--slate-gray);
+  }
+  .text-light-gray {
+    color: var(--light-gray);
+  }
+
+  .bg-charcoal {
+    background-color: var(--charcoal);
+  }
+  .bg-off-white {
+    background-color: var(--off-white);
+  }
+  .bg-electric-blue {
+    background-color: var(--electric-blue);
+  }
+  .bg-dark-blue {
+    background-color: var(--dark-blue);
+  }
+  .bg-slate-gray {
+    background-color: var(--slate-gray);
+  }
+  .bg-light-gray {
+    background-color: var(--light-gray);
+  }
+
+  .border-charcoal {
+    border-color: var(--charcoal);
+  }
+  .border-electric-blue {
+    border-color: var(--electric-blue);
+  }
+  .border-light-gray {
+    border-color: var(--light-gray);
+  }
+
+  .hover\:text-electric-blue:hover {
+    color: var(--electric-blue);
+  }
+  .hover\:bg-dark-blue:hover {
+    background-color: var(--dark-blue);
+  }
+  .hover\:bg-light-gray:hover {
+    background-color: var(--light-gray);
+  }
+
+  .ring-electric-blue {
+    --tw-ring-color: var(--electric-blue);
+  }
+
+  .from-electric-blue {
+    --tw-gradient-from: var(--electric-blue);
+  }
+  .to-dark-blue {
+    --tw-gradient-to: var(--dark-blue);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
