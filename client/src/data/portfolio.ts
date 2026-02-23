@@ -24,6 +24,18 @@ export const portfolioData = {
       { label: "Années d'Expérience", value: "3+" },
       { label: "Certifications en Cours", value: "2" },
     ],
+    highlightedSections: [
+      {
+        id: "myStory",
+        title: "Mon Histoire",
+        content: "Chaque ligne de code que j'écris est imprégnée d'une soif insatiable de résolution de problèmes. Mon parcours a débuté par une curiosité juvénile pour le fonctionnement interne des ordinateurs, évoluant rapidement vers une passion pour la création de solutions tangibles qui améliorent le quotidien. Des modestes scripts d'automatisation aux applications web complexes, chaque projet a été une étape dans ma quête pour transformer des idées abstraites en réalités numériques. Je ne me contente pas de coder ; je cherche à comprendre le cœur des défis pour y apporter des réponses élégantes et efficaces.",
+      },
+      {
+        id: "myMotivations",
+        title: "Mes Motivations",
+        content: "Ce qui me pousse, c'est la conviction que la technologie est un levier puissant pour le progrès. Dans un monde en constante évolution, je suis motivé par l'idée de bâtir des ponts entre les besoins humains et les capacités illimitées de l'innovation. La satisfaction de voir un utilisateur interagir avec une application que j'ai conçue, ou de résoudre un problème technique ardu, est mon moteur. L'opportunité d'apprendre continuellement, d'explorer de nouvelles frontières en cybersécurité et en IA, et de contribuer à un avenir plus connecté et sécurisé, voilà ce qui alimente ma passion et mon engagement.",
+      },
+    ],
   },
 
   skills: {

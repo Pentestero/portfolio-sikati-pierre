@@ -7,6 +7,7 @@ import {
   startTransition,
 } from "react";
 import { usePortfolioStore } from "@/stores/portfolio";
+import { portfolioData } from "@/data/portfolio";
 import {
   Card,
   CardContent,
@@ -73,6 +74,7 @@ import { CSS } from "@dnd-kit/utilities";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css"; // Import Quill styles
 import { decodeHtmlEntities } from "@/lib/utils"; // New import
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 interface FileItem {
   id: string;
@@ -172,6 +174,7 @@ export default function Admin() {
     updateSkillOrder, // Import for skill reordering
   } = usePortfolioStore();
   const { session, signOut } = useAuth();
+  const { t } = useTranslation(); // Initialize useTranslation
 
   // DND-Kit sensors
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
@@ -290,6 +293,25 @@ export default function Admin() {
     technologies_count: profile?.technologies_count || "",
     years_experience: profile?.years_experience || "",
     certifications_count: profile?.certifications_count || "",
+    highlighted_sections: (() => {
+      const defaultSections = portfolioData.about.highlightedSections
+        .filter(s => s.id !== "vision") // Remove vision from default
+        .map(s => ({
+          ...s,
+          id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+        }));
+
+      if (profile?.highlighted_sections) {
+        // Filter out vision and remap IDs from profile data
+        return profile.highlighted_sections
+          .filter(s => s.id !== "vision")
+          .map(s => ({
+            ...s,
+            id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+          }));
+      }
+      return defaultSections;
+    })(),
   });
   const [contactForm, setContactForm] = useState({
     email: contactInfo?.email || "",
@@ -359,6 +381,18 @@ export default function Admin() {
       setProfileForm(prevForm => ({
         ...prevForm,
         vision_text: content,
+      }));
+    },
+    [setProfileForm]
+  );
+
+  const handleProfileHighlightedSectionChange = useCallback(
+    (id: "myStory" | "myMotivations", content: string) => {
+      setProfileForm(prevForm => ({
+        ...prevForm,
+        highlighted_sections: prevForm.highlighted_sections?.map(section =>
+          section.id === id ? { ...section, content } : section
+        ),
       }));
     },
     [setProfileForm]
@@ -761,7 +795,17 @@ export default function Admin() {
 
   const handleSaveProfile = async () => {
     try {
-      await updateProfile(profileForm);
+      // Transform highlighted_sections before saving
+      const transformedHighlightedSections = profileForm.highlighted_sections?.map(s => {
+        // Ensure IDs are "myStory", "myMotivations" before saving
+        const newId = s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id;
+        return { ...s, id: newId };
+      }).filter(s => s.id !== "vision"); // Explicitly filter out vision
+
+      await updateProfile({
+        ...profileForm,
+        highlighted_sections: transformedHighlightedSections,
+      });
       setEditingProfile(false);
       toast.success("Profil mis à jour avec succès !");
     } catch (e: any) {
@@ -1121,6 +1165,27 @@ export default function Admin() {
                           )}
                         </div>
                       </div>
+
+                      {/* Highlighted Sections */}
+                      {profileForm.highlighted_sections?.map(section => (
+                        <div key={section.id}>
+                          <label className="block text-sm text-[#a1a1aa] mb-2">
+                            {t(`home.${section.id}`)}
+                          </label>
+                          <ReactQuill
+                            theme="snow"
+                            value={section.content}
+                            onChange={content =>
+                              handleProfileHighlightedSectionChange(
+                                section.id,
+                                content
+                              )
+                            }
+                            className="bg-[#262626] border-[#333] text-white [&_.ql-toolbar]:bg-[#1a1a1a] [&_.ql-editor]:min-h-[8rem]"
+                          />
+                        </div>
+                      ))}
+
                       {/* Vision Text */}
                       <div>
                         <label className="block text-sm text-[#a1a1aa] mb-2">
@@ -1261,10 +1326,25 @@ export default function Admin() {
                                   profile?.technologies_count || "",
                                 years_experience:
                                   profile?.years_experience || "",
-                                certifications_count:
-                                  profile?.certifications_count || "",
-                              });
-                              setEditingProfile(true);
+                                                                  certifications_count:
+                                                                    profile?.certifications_count || "",
+                                                                highlighted_sections: (() => {
+                                                                  if (profile?.highlighted_sections) {
+                                                                    return profile.highlighted_sections
+                                                                      .filter(s => s.id !== "vision")
+                                                                      .map(s => ({
+                                                                        ...s,
+                                                                        id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+                                                                      }));
+                                                                  }
+                                                                  return portfolioData.about.highlightedSections
+                                                                    .filter(s => s.id !== "vision")
+                                                                    .map(s => ({
+                                                                      ...s,
+                                                                      id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+                                                                    }));
+                                                                })(),
+                                                              });                              setEditingProfile(true);
                             }}
                             className="bg-[#0066ff] hover:bg-[#0052cc]"
                           >

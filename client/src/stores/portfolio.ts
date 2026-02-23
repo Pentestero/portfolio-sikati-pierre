@@ -1,8 +1,13 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { supabase, Database } from "@/lib/supabase";
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
+  highlighted_sections?: {
+    id: "myStory" | "myMotivations";
+    title: string;
+    content: string;
+  }[];
+};
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Skill = Database["public"]["Tables"]["skills"]["Row"];
 export type ContactInfo = Database["public"]["Tables"]["contact_info"]["Row"];
@@ -23,7 +28,7 @@ interface PortfolioStore {
   fetchContactInfo: () => Promise<void>;
   refreshAll: () => Promise<void>;
   clearError: () => void;
-  updateProfile: (data: Partial<Profile>) => Promise<void>;
+  updateProfile: (data: Partial<Omit<Profile, 'highlighted_sections'>> & { highlighted_sections?: Profile['highlighted_sections'] }) => Promise<void>;
   updateContactInfo: (data: Partial<ContactInfo>) => Promise<void>;
   addProject: (
     data: Omit<Project, "id" | "created_at" | "updated_at">
@@ -46,7 +51,6 @@ interface PortfolioStore {
 }
 
 export const usePortfolioStore = create<PortfolioStore>()(
-  persist(
     (set, get) => ({
       profile: null,
       projects: [],
@@ -62,10 +66,29 @@ export const usePortfolioStore = create<PortfolioStore>()(
           set({ isLoading: true, error: null });
           const { data, error } = await supabase
             .from("profiles")
-            .select("*")
+            .select("*, highlighted_sections")
             .single();
           if (error) throw error;
-          set({ profile: data, isLoading: false });
+
+          // Explicitly extract highlighted_sections and other data
+          const { highlighted_sections: rawHighlightedSections, ...restOfData } = data;
+
+          const transformedHighlightedSections = rawHighlightedSections
+            ? (rawHighlightedSections as any[]) // Cast to any[] for transformation
+                .filter(s => s.id !== "vision")
+                .map(s => ({
+                  ...s,
+                  id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+                }))
+            : undefined;
+
+          set({
+            profile: {
+              ...(restOfData as Database["public"]["Tables"]["profiles"]["Row"]),
+              highlighted_sections: transformedHighlightedSections,
+            },
+            isLoading: false,
+          });
         } catch (error) {
           console.error("Error fetching profile:", error);
           set({ error: "Failed to fetch profile", isLoading: false });
@@ -411,16 +434,5 @@ export const usePortfolioStore = create<PortfolioStore>()(
           throw error;
         }
       },
-    }),
-    {
-      name: "portfolio-store",
-      partialize: state => ({
-        profile: state.profile,
-        projects: state.projects,
-        skills: state.skills,
-        contactInfo: state.contactInfo,
-        messages: state.messages,
-      }),
-    }
-  )
+    })
 );

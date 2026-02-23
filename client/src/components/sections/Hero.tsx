@@ -118,15 +118,7 @@ const Hero = () => {
           {heroTitle}
         </motion.h1>
 
-        {/* Subtitle */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-lg md:text-xl lg:text-2xl text-[#a1a1aa] mb-6 max-w-3xl mx-auto font-medium"
-        >
-          {heroSubtitle}
-        </motion.h2>
+        {/* Subtitle - Hidden, using bio for About section instead */}
 
         {/* Description */}
         <motion.p
