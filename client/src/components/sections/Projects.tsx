@@ -261,10 +261,10 @@ const Projects = () => {
                     </div>
 
                     <CardContent className="p-5">
-                      <CardTitle className="text-lg text-white mb-2 line-clamp-1">
+                      <CardTitle className="text-lg text-white mb-2 line-clamp-1 break-words">
                         {project.title}
                       </CardTitle>
-                      <p className="text-[#71717a] text-sm mb-4 line-clamp-2">
+                      <p className="text-[#71717a] text-sm mb-4 line-clamp-3 break-words">
                         {decodeHtmlEntities(project.description)}
                       </p>
 

@@ -39,6 +39,7 @@ import {
   ExternalLink,
   LogOut,
   MessageCircle,
+  GripVertical, // Add GripVertical for drag handle
 } from "lucide-react";
 import {
   AlertDialog,
@@ -87,7 +88,13 @@ const SortableProject = ({
   children,
 }: {
   project: any;
-  children: React.ReactNode;
+  children: (props: {
+    attributes: any;
+    listeners: any;
+    setNodeRef: (element: HTMLElement | null) => void;
+    style: React.CSSProperties;
+    isDragging: boolean;
+  }) => React.ReactNode;
 }) => {
   const {
     attributes,
@@ -105,17 +112,7 @@ const SortableProject = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  return (
-    <div ref={setNodeRef} style={style}>
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing"
-      >
-        {children}
-      </div>
-    </div>
-  );
+  return <div ref={setNodeRef}>{children({ attributes, listeners, setNodeRef, style, isDragging })}</div>;
 };
 
 // Helper component for sortable skills
@@ -124,7 +121,13 @@ const SortableSkill = ({
   children,
 }: {
   skill: any;
-  children: React.ReactNode;
+  children: (props: {
+    attributes: any;
+    listeners: any;
+    setNodeRef: (element: HTMLElement | null) => void;
+    style: React.CSSProperties;
+    isDragging: boolean;
+  }) => React.ReactNode;
 }) => {
   const {
     attributes,
@@ -142,17 +145,7 @@ const SortableSkill = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  return (
-    <div ref={setNodeRef} style={style}>
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing"
-      >
-        {children}
-      </div>
-    </div>
-  );
+  return <div ref={setNodeRef}>{children({ attributes, listeners, setNodeRef, style, isDragging })}</div>;
 };
 
 export default function Admin() {
@@ -1490,251 +1483,263 @@ export default function Admin() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sortedAndFilteredProjects.map((project: any) => (
                     <SortableProject key={project.id} project={project}>
-                      <Card className="bg-[#1a1a1a] border-[#333] h-full hover:border-[#0066ff]/50 transition-all duration-300 group hover:shadow-xl hover:shadow-[#0066ff]/10 overflow-hidden">
-                        <CardContent className="p-4">
-
-                          {editingProjectId === project.id ? (
-                            // Edit Form for Project
-                            <div className="space-y-3">
-                              <Input
-                                placeholder="Titre du projet *"
-                                value={editedProjectForm.title}
-                                onChange={e =>
-                                  setEditedProjectForm({
-                                    ...editedProjectForm,
-                                    title: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white"
-                              />
-                              <select
-                                value={editedProjectForm.category}
-                                onChange={e =>
-                                  setEditedProjectForm({
-                                    ...editedProjectForm,
-                                    category: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white rounded-lg px-4 py-2 w-full"
-                              >
-                                <option value="web">Web</option>
-                                <option value="mobile">Mobile</option>
-                                <option value="network">Réseau</option>
-                                <option value="security">Sécurité</option>
-                                <option value="ml">ML/IA</option>
-                              </select>
-                              <Input
-                                placeholder="URL GitHub"
-                                value={editedProjectForm.github_url}
-                                onChange={e =>
-                                  setEditedProjectForm({
-                                    ...editedProjectForm,
-                                    github_url: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white"
-                              />
-                              <Input
-                                placeholder="URL Démo"
-                                value={editedProjectForm.demo_url}
-                                onChange={e =>
-                                  setEditedProjectForm({
-                                    ...editedProjectForm,
-                                    demo_url: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white"
-                              />
-                              <Input
-                                placeholder="Technologies (séparées par virgule)"
-                                value={editedProjectForm.technologies}
-                                onChange={e =>
-                                  setEditedProjectForm({
-                                    ...editedProjectForm,
-                                    technologies: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white"
-                              />
-                              {/* Project Image Upload for Editing */}
-                              <div>
-                                <label className="block text-sm text-[#a1a1aa] mb-2">
-                                  Image du Projet
-                                </label>
-                                <div className="flex items-center gap-4">
-                                  <input
-                                    type="file"
-                                    ref={projectImageInputRef}
-                                    onChange={e =>
-                                      handleProjectImageUpload(e, true)
-                                    } // true for editing project
-                                    accept="image/*"
-                                    className="hidden"
-                                    disabled={uploading}
-                                  />
-                                  <Button
-                                    onClick={() =>
-                                      projectImageInputRef.current?.click()
-                                    }
-                                    className="bg-[#0066ff] hover:bg-[#0052cc]"
-                                    disabled={uploading}
-                                  >
-                                    <Image className="w-4 h-4 mr-2" />
-                                    {uploading ? "Upload..." : "Uploader Image"}
-                                  </Button>
-                                  {editedProjectForm.image_url && (
-                                    <img
-                                      src={editedProjectForm.image_url}
-                                      alt="Aperçu du projet"
-                                      className="w-24 h-24 object-cover rounded-md border-2 border-[#0066ff]"
-                                      loading="lazy"
+                      {({ attributes, listeners, setNodeRef, style, isDragging }) => (
+                        <Card
+                          ref={setNodeRef}
+                          style={style}
+                          className="bg-[#1a1a1a] border-[#333] h-full hover:border-[#0066ff]/50 transition-all duration-300 group hover:shadow-xl hover:shadow-[#0066ff]/10 overflow-hidden"
+                        >
+                          <CardContent className="p-4">
+                            {editingProjectId === project.id ? (
+                              // Edit Form for Project
+                              <div className="space-y-3">
+                                <Input
+                                  placeholder="Titre du projet *"
+                                  value={editedProjectForm.title}
+                                  onChange={e =>
+                                    setEditedProjectForm({
+                                      ...editedProjectForm,
+                                      title: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white"
+                                />
+                                <select
+                                  value={editedProjectForm.category}
+                                  onChange={e =>
+                                    setEditedProjectForm({
+                                      ...editedProjectForm,
+                                      category: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white rounded-lg px-4 py-2 w-full"
+                                >
+                                  <option value="web">Web</option>
+                                  <option value="mobile">Mobile</option>
+                                  <option value="network">Réseau</option>
+                                  <option value="security">Sécurité</option>
+                                  <option value="ml">ML/IA</option>
+                                </select>
+                                <Input
+                                  placeholder="URL GitHub"
+                                  value={editedProjectForm.github_url}
+                                  onChange={e =>
+                                    setEditedProjectForm({
+                                      ...editedProjectForm,
+                                      github_url: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white"
+                                />
+                                <Input
+                                  placeholder="URL Démo"
+                                  value={editedProjectForm.demo_url}
+                                  onChange={e =>
+                                    setEditedProjectForm({
+                                      ...editedProjectForm,
+                                      demo_url: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white"
+                                />
+                                <Input
+                                  placeholder="Technologies (séparées par virgule)"
+                                  value={editedProjectForm.technologies}
+                                  onChange={e =>
+                                    setEditedProjectForm({
+                                      ...editedProjectForm,
+                                      technologies: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white"
+                                />
+                                {/* Project Image Upload for Editing */}
+                                <div>
+                                  <label className="block text-sm text-[#a1a1aa] mb-2">
+                                    Image du Projet
+                                  </label>
+                                  <div className="flex items-center gap-4">
+                                    <input
+                                      type="file"
+                                      ref={projectImageInputRef}
+                                      onChange={e =>
+                                        handleProjectImageUpload(e, true)
+                                      } // true for editing project
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploading}
                                     />
-                                  )}
+                                    <Button
+                                      onClick={() =>
+                                        projectImageInputRef.current?.click()
+                                      }
+                                      className="bg-[#0066ff] hover:bg-[#0052cc]"
+                                      disabled={uploading}
+                                    >
+                                      <Image className="w-4 h-4 mr-2" />
+                                      {uploading ? "Upload..." : "Uploader Image"}
+                                    </Button>
+                                    {editedProjectForm.image_url && (
+                                      <img
+                                        src={editedProjectForm.image_url}
+                                        alt="Aperçu du projet"
+                                        className="w-24 h-24 object-cover rounded-md border-2 border-[#0066ff]"
+                                        loading="lazy"
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                                <ReactQuill
+                                  theme="snow"
+                                  placeholder="Description du projet"
+                                  value={editedProjectForm.description}
+                                  onChange={handleEditedProjectDescriptionChange}
+                                  className="bg-[#262626] border-[#333] text-white [&_.ql-toolbar]:bg-[#1a1a1a] [&_.ql-editor]:min-h-[8rem]"
+                                />{" "}
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    onClick={handleSaveEditedProject}
+                                    className="flex-1 bg-[#0066ff] hover:bg-[#0052cc]"
+                                  >
+                                    <Save className="w-4 h-4 mr-2" /> Sauvegarder
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={handleCancelEditProject}
+                                    className="flex-1 border-[#333] text-[#a1a1aa]"
+                                  >
+                                    <X className="w-4 h-4" /> Annuler
+                                  </Button>
                                 </div>
                               </div>
-                              <ReactQuill
-                                theme="snow"
-                                placeholder="Description du projet"
-                                value={editedProjectForm.description}
-                                onChange={handleEditedProjectDescriptionChange}
-                                className="bg-[#262626] border-[#333] text-white [&_.ql-toolbar]:bg-[#1a1a1a] [&_.ql-editor]:min-h-[8rem]"
-                              />{" "}
-                              <div className="flex gap-2 pt-2">
-                                <Button
-                                  onClick={handleSaveEditedProject}
-                                  className="flex-1 bg-[#0066ff] hover:bg-[#0052cc]"
-                                >
-                                  <Save className="w-4 h-4 mr-2" /> Sauvegarder
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={handleCancelEditProject}
-                                  className="flex-1 border-[#333] text-[#a1a1aa]"
-                                >
-                                  <X className="w-4 h-4" /> Annuler
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            // Display Mode for Project
-                            <>
-                              <div className="flex justify-between items-start mb-3">
-                                <h3 className="font-semibold text-white truncate flex-1">
-                                  {project.title}
-                                </h3>
-                                <div className="flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      handleEditProjectClick(project);
-                                    }}
-                                    aria-label="Modifier le projet"
-                                  >
-                                    <Edit className="w-4 h-4 text-[#0066ff]" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
+                            ) : (
+                              // Display Mode for Project
+                              <>
+                                <div className="flex justify-between items-center mb-3">
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <GripVertical
+                                      className="w-5 h-5 text-[#71717a] cursor-grab active:cursor-grabbing"
+                                      {...attributes}
+                                      {...listeners}
+                                    />
+                                    <h3 className="font-semibold text-white truncate flex-1">
+                                      {project.title}
+                                    </h3>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        handleEditProjectClick(project);
+                                      }}
+                                      aria-label="Modifier le projet"
+                                    >
+                                      <Edit className="w-4 h-4 text-[#0066ff]" />
+                                    </Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={e => e.stopPropagation()}
+                                          aria-label="Supprimer le projet"
+                                        >
+                                          <Trash2 className="w-4 h-4 text-red-500" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent className="bg-[#1a1a1a] border-[#333] text-white">
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle className="text-white">
+                                            Confirmer la suppression
+                                          </AlertDialogTitle>
+                                          <AlertDialogDescription className="text-[#a1a1aa]">
+                                            Êtes-vous sûr de vouloir supprimer ce
+                                            projet ? Cette action est
+                                            irréversible.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel className="border-[#333] text-[#a1a1aa] hover:bg-[#262626]">
+                                            Annuler
+                                          </AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() =>
+                                              handleDeleteProject(project.id)
+                                            }
+                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                          >
+                                            Supprimer
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-[#71717a] mb-3 line-clamp-2">
+                                  {project.description
+                                    ? project.description
+                                        .replace(/&nbsp;/g, " ")
+                                        .replace(/&#39;/g, "'")
+                                        .replace(/&amp;/g, "&")
+                                        .replace(/&lt;/g, "<")
+                                        .replace(/&gt;/g, ">")
+                                        .replace(/&quot;/g, '"')
+                                    : ""}
+                                </p>
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {(project.technologies || [])
+                                    .slice(0, 3)
+                                    .map((tech: string, i: number) => (
+                                      <Badge
+                                        key={i}
+                                        variant="outline"
+                                        className="text-xs border-[#333] text-[#a1a1aa]"
+                                      >
+                                        {tech}
+                                      </Badge>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2">
+                                  {project.github_url && (
+                                    <a
+                                      href={project.github_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex-1"
+                                    >
                                       <Button
                                         size="sm"
-                                        variant="ghost"
-                                        onClick={e => e.stopPropagation()}
-                                        aria-label="Supprimer le projet"
+                                        variant="outline"
+                                        className="w-full border-[#333] text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white"
                                       >
-                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                        <ExternalLink className="w-3 h-3 mr-1" />{" "}
+                                        Code
                                       </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="bg-[#1a1a1a] border-[#333] text-white">
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-white">
-                                          Confirmer la suppression
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription className="text-[#a1a1aa]">
-                                          Êtes-vous sûr de vouloir supprimer ce
-                                          projet ? Cette action est
-                                          irréversible.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel className="border-[#333] text-[#a1a1aa] hover:bg-[#262626]">
-                                          Annuler
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            handleDeleteProject(project.id)
-                                          }
-                                          className="bg-red-600 hover:bg-red-700 text-white"
-                                        >
-                                          Supprimer
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                    </a>
+                                  )}
+                                  {project.demo_url && (
+                                    <a
+                                      href={project.demo_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex-1"
+                                    >
+                                      <Button
+                                        size="sm"
+                                        className="w-full bg-[#0066ff] hover:bg-[#0052cc]"
+                                      >
+                                        <Eye className="w-3 h-3 mr-1" /> Demo
+                                      </Button>
+                                    </a>
+                                  )}
                                 </div>
-                              </div>
-                              <p className="text-sm text-[#71717a] mb-3 line-clamp-2">
-                                {project.description
-                                  ? project.description
-                                      .replace(/&nbsp;/g, " ")
-                                      .replace(/&#39;/g, "'")
-                                      .replace(/&amp;/g, "&")
-                                      .replace(/&lt;/g, "<")
-                                      .replace(/&gt;/g, ">")
-                                      .replace(/&quot;/g, '"')
-                                  : ""}
-                              </p>
-                              <div className="flex flex-wrap gap-1 mb-3">
-                                {(project.technologies || [])
-                                  .slice(0, 3)
-                                  .map((tech: string, i: number) => (
-                                    <Badge
-                                      key={i}
-                                      variant="outline"
-                                      className="text-xs border-[#333] text-[#a1a1aa]"
-                                    >
-                                      {tech}
-                                    </Badge>
-                                  ))}
-                              </div>
-                              <div className="flex gap-2">
-                                {project.github_url && (
-                                  <a
-                                    href={project.github_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex-1"
-                                  >
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="w-full border-[#333] text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white"
-                                    >
-                                      <ExternalLink className="w-3 h-3 mr-1" />{" "}
-                                      Code
-                                    </Button>
-                                  </a>
-                                )}
-                                {project.demo_url && (
-                                  <a
-                                    href={project.demo_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex-1"
-                                  >
-                                    <Button
-                                      size="sm"
-                                      className="w-full bg-[#0066ff] hover:bg-[#0052cc]"
-                                    >
-                                      <Eye className="w-3 h-3 mr-1" /> Demo
-                                    </Button>
-                                  </a>
-                                )}
-                              </div>
-                            </>
-                          )}
-                        </CardContent>
-                      </Card>
+                              </>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
                     </SortableProject>
                   ))}
                 </div>
@@ -1777,56 +1782,64 @@ export default function Admin() {
                     <label className="block text-sm text-[#a1a1aa]">
                       Technologies (Nom et Pourcentage)
                     </label>
-                    {newSkill.technologies.map((tech, index) => (
-                      <div key={index} className="flex gap-2">
-                        <Input
-                          placeholder="Nom de la technologie"
-                          value={tech.name}
-                          onChange={e => {
-                            const updatedTechs = [...newSkill.technologies];
-                            updatedTechs[index].name = e.target.value;
-                            setNewSkill({
-                              ...newSkill,
-                              technologies: updatedTechs,
-                            });
-                          }}
-                          className="bg-[#262626] border-[#333] text-white flex-1"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Pourcentage (0-100)"
-                          value={tech.level}
-                          onChange={e => {
-                            const updatedTechs = [...newSkill.technologies];
-                            updatedTechs[index].level = parseInt(
-                              e.target.value
-                            );
-                            setNewSkill({
-                              ...newSkill,
-                              technologies: updatedTechs,
-                            });
-                          }}
-                          min="0"
-                          max="100"
-                          className="bg-[#262626] border-[#333] text-white w-24"
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const updatedTechs = newSkill.technologies.filter(
-                              (_, i) => i !== index
-                            );
-                            setNewSkill({
-                              ...newSkill,
-                              technologies: updatedTechs,
-                            });
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
+                    {editedSkillForm.technologies.map(
+                      (tech, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            placeholder="Nom de la technologie"
+                            value={tech.name}
+                            onChange={e => {
+                              const updatedTechs = [
+                                ...editedSkillForm.technologies,
+                              ];
+                              updatedTechs[index].name =
+                                e.target.value;
+                              setEditedSkillForm({
+                                ...editedSkillForm,
+                                technologies: updatedTechs,
+                              });
+                            }}
+                            className="bg-[#262626] border-[#333] text-white flex-1"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Pourcentage (0-100)"
+                            value={tech.level}
+                            onChange={e => {
+                              const updatedTechs = [
+                                ...editedSkillForm.technologies,
+                              ];
+                              updatedTechs[index].level = parseInt(
+                                e.target.value
+                              );
+                              setEditedSkillForm({
+                                ...editedSkillForm,
+                                technologies: updatedTechs,
+                              });
+                            }}
+                            min="0"
+                            max="100"
+                            className="bg-[#262626] border-[#333] text-white w-24"
+                          />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              const updatedTechs =
+                                editedSkillForm.technologies.filter(
+                                  (_, i) => i !== index
+                                );
+                              setEditedSkillForm({
+                                ...editedSkillForm,
+                                technologies: updatedTechs,
+                              });
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )
+                    )}
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -1897,218 +1910,229 @@ export default function Admin() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {sortedAndFilteredSkills.map((skill: any) => (
                     <SortableSkill key={skill.id} skill={skill}>
-                      <Card
-                        key={skill.id}
-                        className="bg-[#1a1a1a] border-[#333]"
-                      >
-                        <CardContent className="p-4">
-                          {editingSkillId === skill.id ? (
-                            <div className="space-y-3">
-                              <Input
-                                placeholder="Catégorie (ex: Développement Web) *"
-                                value={editedSkillForm.category}
-                                onChange={e =>
-                                  setEditedSkillForm({
-                                    ...editedSkillForm,
-                                    category: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white"
-                              />
-                              <select
-                                value={editedSkillForm.level}
-                                onChange={e =>
-                                  setEditedSkillForm({
-                                    ...editedSkillForm,
-                                    level: e.target.value,
-                                  })
-                                }
-                                className="bg-[#262626] border-[#333] text-white rounded-lg px-4 py-2 w-full"
-                              >
-                                <option value="Avancé">Avancé</option>
-                                <option value="Intermédiaire">
-                                  Intermédiaire
-                                </option>
-                                <option value="Débutant">Débutant</option>
-                              </select>
-
-                              <div className="space-y-2">
-                                <label className="block text-sm text-[#a1a1aa]">
-                                  Technologies (Nom et Pourcentage)
-                                </label>
-                                {editedSkillForm.technologies.map(
-                                  (tech, index) => (
-                                    <div key={index} className="flex gap-2">
-                                      <Input
-                                        placeholder="Nom de la technologie"
-                                        value={tech.name}
-                                        onChange={e => {
-                                          const updatedTechs = [
-                                            ...editedSkillForm.technologies,
-                                          ];
-                                          updatedTechs[index].name =
-                                            e.target.value;
-                                          setEditedSkillForm({
-                                            ...editedSkillForm,
-                                            technologies: updatedTechs,
-                                          });
-                                        }}
-                                        className="bg-[#262626] border-[#333] text-white flex-1"
-                                      />
-                                      <Input
-                                        type="number"
-                                        placeholder="Pourcentage (0-100)"
-                                        value={tech.level}
-                                        onChange={e => {
-                                          const updatedTechs = [
-                                            ...editedSkillForm.technologies,
-                                          ];
-                                          updatedTechs[index].level = parseInt(
-                                            e.target.value
-                                          );
-                                          setEditedSkillForm({
-                                            ...editedSkillForm,
-                                            technologies: updatedTechs,
-                                          });
-                                        }}
-                                        min="0"
-                                        max="100"
-                                        className="bg-[#262626] border-[#333] text-white w-24"
-                                      />
-                                      <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => {
-                                          const updatedTechs =
-                                            editedSkillForm.technologies.filter(
-                                              (_, i) => i !== index
-                                            );
-                                          setEditedSkillForm({
-                                            ...editedSkillForm,
-                                            technologies: updatedTechs,
-                                          });
-                                        }}
-                                      >
-                                        <X className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  )
-                                )}
-                                <Button
-                                  variant="outline"
-                                  onClick={() =>
+                      {({ attributes, listeners, setNodeRef, style, isDragging }) => (
+                        <Card
+                          ref={setNodeRef}
+                          style={style}
+                          className="bg-[#1a1a1a] border-[#333] h-full"
+                        >
+                          <CardContent className="p-4">
+                            {editingSkillId === skill.id ? (
+                              <div className="space-y-3">
+                                <Input
+                                  placeholder="Catégorie (ex: Développement Web) *"
+                                  value={editedSkillForm.category}
+                                  onChange={e =>
                                     setEditedSkillForm({
                                       ...editedSkillForm,
-                                      technologies: [
-                                        ...editedSkillForm.technologies,
-                                        { name: "", level: 0 },
-                                      ],
+                                      category: e.target.value,
                                     })
                                   }
-                                  className="w-full border-[#333] text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white"
+                                  className="bg-[#262626] border-[#333] text-white"
+                                />
+                                <select
+                                  value={editedSkillForm.level}
+                                  onChange={e =>
+                                    setEditedSkillForm({
+                                      ...editedSkillForm,
+                                      level: e.target.value,
+                                    })
+                                  }
+                                  className="bg-[#262626] border-[#333] text-white rounded-lg px-4 py-2 w-full"
                                 >
-                                  <Plus className="w-4 h-4 mr-2" /> Ajouter une
-                                  technologie
-                                </Button>
-                              </div>
+                                  <option value="Avancé">Avancé</option>
+                                  <option value="Intermédiaire">
+                                    Intermédiaire
+                                  </option>
+                                  <option value="Débutant">Débutant</option>
+                                </select>
 
-                              <div className="flex gap-2">
-                                <Button
-                                  onClick={handleSaveEditedSkill}
-                                  className="flex-1 bg-[#0066ff] hover:bg-[#0052cc]"
-                                >
-                                  <Save className="w-4 h-4 mr-2" /> Sauvegarder
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={handleCancelEditSkill}
-                                  className="flex-1 border-[#333] text-[#a1a1aa]"
-                                >
-                                  <X className="w-4 h-4" /> Annuler
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-semibold text-white">
-                                  {skill.category}
-                                </h3>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {(Array.isArray(skill.technologies)
-                                    ? skill.technologies
-                                    : []
-                                  ).map((tech: any, i: number) => (
-                                    <Badge
-                                      key={i}
-                                      variant="outline"
-                                      className="text-xs border-[#333] text-[#a1a1aa]"
-                                    >
-                                      {tech.name}
-                                    </Badge>
-                                  ))}
+                                <div className="space-y-2">
+                                  <label className="block text-sm text-[#a1a1aa]">
+                                    Technologies (Nom et Pourcentage)
+                                  </label>
+                                  {editedSkillForm.technologies.map(
+                                    (tech, index) => (
+                                      <div key={index} className="flex gap-2">
+                                        <Input
+                                          placeholder="Nom de la technologie"
+                                          value={tech.name}
+                                          onChange={e => {
+                                            const updatedTechs = [
+                                              ...editedSkillForm.technologies,
+                                            ];
+                                            updatedTechs[index].name =
+                                              e.target.value;
+                                            setEditedSkillForm({
+                                              ...editedSkillForm,
+                                              technologies: updatedTechs,
+                                            });
+                                          }}
+                                          className="bg-[#262626] border-[#333] text-white flex-1"
+                                        />
+                                        <Input
+                                          type="number"
+                                          placeholder="Pourcentage (0-100)"
+                                          value={tech.level}
+                                          onChange={e => {
+                                            const updatedTechs = [
+                                              ...editedSkillForm.technologies,
+                                            ];
+                                            updatedTechs[index].level = parseInt(
+                                              e.target.value
+                                            );
+                                            setEditedSkillForm({
+                                              ...editedSkillForm,
+                                              technologies: updatedTechs,
+                                            });
+                                          }}
+                                          min="0"
+                                          max="100"
+                                          className="bg-[#262626] border-[#333] text-white w-24"
+                                        />
+                                        <Button
+                                          variant="destructive"
+                                          size="sm"
+                                          onClick={() => {
+                                            const updatedTechs =
+                                              editedSkillForm.technologies.filter(
+                                                (_, i) => i !== index
+                                              );
+                                            setEditedSkillForm({
+                                              ...editedSkillForm,
+                                              technologies: updatedTechs,
+                                            });
+                                          }}
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    )
+                                  )}
+                                  <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                      setEditedSkillForm({
+                                        ...editedSkillForm,
+                                        technologies: [
+                                          ...editedSkillForm.technologies,
+                                          { name: "", level: 0 },
+                                        ],
+                                      })
+                                    }
+                                    className="w-full border-[#333] text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white"
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" /> Ajouter une
+                                    technologie
+                                  </Button>
                                 </div>
-                                <Badge
-                                  variant="outline"
-                                  className="mt-2 border-[#333] text-[#a1a1aa]"
-                                >
-                                  {skill.level}
-                                </Badge>
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={handleSaveEditedSkill}
+                                    className="flex-1 bg-[#0066ff] hover:bg-[#0052cc]"
+                                  >
+                                    <Save className="w-4 h-4 mr-2" /> Sauvegarder
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={handleCancelEditSkill}
+                                    className="flex-1 border-[#333] text-[#a1a1aa]"
+                                  >
+                                    <X className="w-4 h-4" /> Annuler
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleEditSkillClick(skill);
-                                  }}
-                                  aria-label="Modifier la compétence"
-                                >
-                                  <Edit className="w-4 h-4 text-[#0066ff]" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={e => e.stopPropagation()}
-                                      aria-label="Supprimer la compétence"
+                            ) : (
+                              // Display Mode for Skill
+                              <div className="flex justify-between items-start">
+                                <div className="flex items-center gap-2">
+                                  <GripVertical
+                                    className="w-5 h-5 text-[#71717a] cursor-grab active:cursor-grabbing"
+                                    {...attributes}
+                                    {...listeners}
+                                  />
+                                  <div>
+                                    <h3 className="font-semibold text-white">
+                                      {skill.category}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {(Array.isArray(skill.technologies)
+                                        ? skill.technologies
+                                        : []
+                                      ).map((tech: any, i: number) => (
+                                        <Badge
+                                          key={i}
+                                          variant="outline"
+                                          className="text-xs border-[#333] text-[#a1a1aa]"
+                                        >
+                                          {tech.name}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                    <Badge
+                                      variant="outline"
+                                      className="mt-2 border-[#333] text-[#a1a1aa]"
                                     >
-                                      <Trash2 className="w-4 h-4 text-red-500" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent className="bg-[#1a1a1a] border-[#333] text-white">
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-white">
-                                        Confirmer la suppression
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription className="text-[#a1a1aa]">
-                                        Êtes-vous sûr de vouloir supprimer cette
-                                        compétence ? Cette action est
-                                        irréversible.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="border-[#333] text-[#1a1a1aa] hover:bg-[#262626]">
-                                        Annuler
-                                      </AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() =>
-                                          handleDeleteSkill(skill.id)
-                                        }
-                                        className="bg-red-600 hover:bg-red-700 text-white"
+                                      {skill.level}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleEditSkillClick(skill);
+                                    }}
+                                    aria-label="Modifier la compétence"
+                                  >
+                                    <Edit className="w-4 h-4 text-[#0066ff]" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={e => e.stopPropagation()}
+                                        aria-label="Supprimer la compétence"
                                       >
-                                        Supprimer
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-[#1a1a1a] border-[#333] text-white">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-white">
+                                          Confirmer la suppression
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-[#a1a1aa]">
+                                          Êtes-vous sûr de vouloir supprimer cette
+                                          compétence ? Cette action est
+                                          irréversible.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="border-[#333] text-[#1a1a1aa] hover:bg-[#262626]">
+                                          Annuler
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() =>
+                                            handleDeleteSkill(skill.id)
+                                          }
+                                          className="bg-red-600 hover:bg-red-700 text-white"
+                                        >
+                                          Supprimer
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
                     </SortableSkill>
                   ))}
                 </div>
@@ -2338,7 +2362,7 @@ export default function Admin() {
                               <p className="text-[#a1a1aa] text-sm">
                                 De: {message.name} &lt;{message.email}&gt;
                               </p>
-                              <p className="text-[#71717a] text-xs">
+                              <p className="text-[#71717a] text-sm">
                                 Reçu le:{" "}
                                 {new Date(message.created_at).toLocaleString()}
                               </p>

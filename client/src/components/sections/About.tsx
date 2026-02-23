@@ -142,7 +142,7 @@ const About = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {dynamicStats.map((stat, index) => (
               <motion.div
