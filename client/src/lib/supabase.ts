@@ -18,11 +18,12 @@ export interface Database {
           id: string;
           full_name: string | null;
           avatar_url: string | null;
-          bio: string | null;
+          bio: Record<string, string> | null;
           location: string | null;
           created_at: string;
           cv_url: string | null;
-          vision_text: string | null;
+          vision_text: Record<string, string> | null;
+          hero_description: Record<string, string> | null;
           projects_count: string | null;
           technologies_count: string | null;
           years_experience: string | null;
@@ -32,11 +33,12 @@ export interface Database {
           id: string;
           full_name?: string | null;
           avatar_url?: string | null;
-          bio?: string | null;
+          bio?: Record<string, string> | null;
           location?: string | null;
           created_at?: string;
           cv_url?: string | null;
-          vision_text?: string | null;
+          vision_text?: Record<string, string> | null;
+          hero_description?: Record<string, string> | null;
           projects_count?: string | null;
           technologies_count?: string | null;
           years_experience?: string | null;
@@ -45,11 +47,12 @@ export interface Database {
         Update: {
           full_name?: string | null;
           avatar_url?: string | null;
-          bio?: string | null;
+          bio?: Record<string, string> | null;
           location?: string | null;
           created_at?: string;
           cv_url?: string | null;
-          vision_text?: string | null;
+          vision_text?: Record<string, string> | null;
+          hero_description?: Record<string, string> | null;
           projects_count?: string | null;
           technologies_count?: string | null;
           years_experience?: string | null;

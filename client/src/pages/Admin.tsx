@@ -6,6 +6,7 @@ import {
   useCallback,
   startTransition,
 } from "react";
+import { motion } from "framer-motion";
 import { usePortfolioStore } from "@/stores/portfolio";
 import { portfolioData } from "@/data/portfolio";
 import {
@@ -282,13 +283,40 @@ export default function Admin() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingContact, setEditingContact] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Helper functions to convert between JSON and string for translations
+  const getStringFromTranslations = (translations: any, fallback: string = ""): string => {
+    if (!translations) return fallback;
+    
+    let text = "";
+    
+    if (typeof translations === "string") {
+      text = translations;
+    } else if (translations && typeof translations === "object") {
+      text = translations["fr"] || translations["en"] || "";
+    }
+    
+    if (typeof text !== "string" || !text) return fallback;
+    
+    // Decode HTML entities and strip HTML tags for display
+    return text
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"');
+  };
+
   const [profileForm, setProfileForm] = useState({
     full_name: profile?.full_name || "",
-    bio: profile?.bio || "",
+    bio: getStringFromTranslations(profile?.bio),
     location: profile?.location || "",
     avatar_url: profile?.avatar_url || "",
     cv_url: profile?.cv_url || "",
-    vision_text: profile?.vision_text || "",
+    vision_text: getStringFromTranslations(profile?.vision_text),
+    hero_description: getStringFromTranslations(profile?.hero_description),
     projects_count: profile?.projects_count || "",
     technologies_count: profile?.technologies_count || "",
     years_experience: profile?.years_experience || "",
@@ -802,10 +830,16 @@ export default function Admin() {
         return { ...s, id: newId };
       }).filter(s => s.id !== "vision"); // Explicitly filter out vision
 
-      await updateProfile({
+      // Convert translation fields to JSON format
+      const profileDataToSave = {
         ...profileForm,
-        highlighted_sections: transformedHighlightedSections,
-      });
+        bio: { fr: profileForm.bio } as any,
+        vision_text: { fr: profileForm.vision_text } as any,
+        hero_description: { fr: profileForm.hero_description } as any,
+        highlighted_sections: transformedHighlightedSections as any,
+      };
+
+      await updateProfile(profileDataToSave as any);
       setEditingProfile(false);
       toast.success("Profil mis à jour avec succès !");
     } catch (e: any) {
@@ -1198,6 +1232,24 @@ export default function Admin() {
                           className="bg-[#262626] border-[#333] text-white [&_.ql-toolbar]:bg-[#1a1a1a] [&_.ql-editor]:min-h-[8rem]"
                         />
                       </div>
+                      {/* Hero Description */}
+                      <div>
+                        <label className="block text-sm text-[#a1a1aa] mb-2">
+                          Description Hero (Page d'accueil)
+                        </label>
+                        <Textarea
+                          value={profileForm.hero_description}
+                          onChange={e =>
+                            setProfileForm({
+                              ...profileForm,
+                              hero_description: e.target.value,
+                            })
+                          }
+                          className="bg-[#262626] border-[#333] text-white placeholder-[#52525b]"
+                          placeholder="Description qui s'affiche sur la page d'accueil..."
+                          rows={4}
+                        />
+                      </div>
                       {/* Projects Count */}
                       <div>
                         <label className="block text-sm text-[#a1a1aa] mb-2">
@@ -1305,46 +1357,43 @@ export default function Admin() {
                             </div>
                           </div>
                           <p className="text-[#a1a1aa]">
-                            {profile.bio
-                              ? profile.bio
-                                  .replace(/<[^>]*>/g, "")
-                                  .replace(/&nbsp;/g, " ")
-                                  .replace(/&#39;/g, "'")
-                              : ""}
+                            {getStringFromTranslations(profile.bio, "")}
                           </p>
                           <Button
                             onClick={() => {
                               setProfileForm({
                                 full_name: profile?.full_name || "",
-                                bio: profile?.bio || "",
+                                bio: getStringFromTranslations(profile?.bio, ""),
                                 location: profile?.location || "",
                                 avatar_url: profile?.avatar_url || "",
                                 cv_url: profile?.cv_url || "",
-                                vision_text: profile?.vision_text || "",
+                                vision_text: getStringFromTranslations(profile?.vision_text, ""),
+                                hero_description: getStringFromTranslations(profile?.hero_description, ""),
                                 projects_count: profile?.projects_count || "",
                                 technologies_count:
                                   profile?.technologies_count || "",
                                 years_experience:
                                   profile?.years_experience || "",
-                                                                  certifications_count:
-                                                                    profile?.certifications_count || "",
-                                                                highlighted_sections: (() => {
-                                                                  if (profile?.highlighted_sections) {
-                                                                    return profile.highlighted_sections
-                                                                      .filter(s => s.id !== "vision")
-                                                                      .map(s => ({
-                                                                        ...s,
-                                                                        id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-                                                                      }));
-                                                                  }
-                                                                  return portfolioData.about.highlightedSections
-                                                                    .filter(s => s.id !== "vision")
-                                                                    .map(s => ({
-                                                                      ...s,
-                                                                      id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-                                                                    }));
-                                                                })(),
-                                                              });                              setEditingProfile(true);
+                                certifications_count:
+                                  profile?.certifications_count || "",
+                                highlighted_sections: (() => {
+                                  if (profile?.highlighted_sections) {
+                                    return profile.highlighted_sections
+                                      .filter(s => s.id !== "vision")
+                                      .map(s => ({
+                                        ...s,
+                                        id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+                                      }));
+                                  }
+                                  return portfolioData.about.highlightedSections
+                                    .filter(s => s.id !== "vision")
+                                    .map(s => ({
+                                      ...s,
+                                      id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
+                                    }));
+                                })(),
+                              });
+                              setEditingProfile(true);
                             }}
                             className="bg-[#0066ff] hover:bg-[#0052cc]"
                           >
@@ -1391,17 +1440,9 @@ export default function Admin() {
                     <p className="text-[#71717a] text-sm mb-2">
                       {profile?.location || "Votre localisation"}
                     </p>
-                    <p
-                      className="text-[#a1a1aa] text-sm"
-                      dangerouslySetInnerHTML={{
-                        __html: (profile?.bio || "Votre bio")
-                          .replace(/&nbsp;/g, " ")
-                          .replace(/&#39;/g, "'")
-                          .replace(/&amp;/g, "&")
-                          .replace(/&lt;/g, "<")
-                          .replace(/&gt;/g, ">"),
-                      }}
-                    />
+                    <p className="text-[#a1a1aa] text-sm">
+                      {getStringFromTranslations(profile?.bio, "Votre bio")}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -1695,39 +1736,41 @@ export default function Admin() {
                             ) : (
                               // Display Mode for Project
                               <>
-                                <div className="flex justify-between items-center mb-3">
-                                  <div className="flex items-center gap-2 flex-1">
+                                <div className="flex justify-between items-start mb-3 gap-2">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
                                     <GripVertical
-                                      className="w-5 h-5 text-[#71717a] cursor-grab active:cursor-grabbing"
+                                      className="w-5 h-5 text-[#71717a] cursor-grab active:cursor-grabbing flex-shrink-0"
                                       {...attributes}
                                       {...listeners}
                                     />
-                                    <h3 className="font-semibold text-white truncate flex-1">
+                                    <h3 className="font-semibold text-white text-sm sm:text-base break-words">
                                       {project.title}
                                     </h3>
                                   </div>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
+                                  <div className="flex gap-1 flex-shrink-0">
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
                                       onClick={e => {
                                         e.stopPropagation();
                                         handleEditProjectClick(project);
                                       }}
+                                      className="p-1.5 sm:p-2 rounded-lg bg-[#0066ff] hover:bg-[#0052cc] text-white transition-all duration-200"
                                       aria-label="Modifier le projet"
                                     >
-                                      <Edit className="w-4 h-4 text-[#0066ff]" />
-                                    </Button>
+                                      <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </motion.button>
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
+                                        <motion.button
+                                          whileHover={{ scale: 1.1 }}
+                                          whileTap={{ scale: 0.9 }}
                                           onClick={e => e.stopPropagation()}
+                                          className="p-1.5 sm:p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all duration-200"
                                           aria-label="Supprimer le projet"
                                         >
-                                          <Trash2 className="w-4 h-4 text-red-500" />
-                                        </Button>
+                                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                        </motion.button>
                                       </AlertDialogTrigger>
                                       <AlertDialogContent className="bg-[#1a1a1a] border-[#333] text-white">
                                         <AlertDialogHeader>

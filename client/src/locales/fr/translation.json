@@ -173,6 +173,9 @@
     "contact": "Contact"
   },
   "footer": {
-    "allRightsReserved": "Tous droits réservés."
+    "allRightsReserved": "Tous droits réservés.",
+    "quickLinks": "Liens Rapides",
+    "followMe": "Suivez-moi",
+    "description": "Développeur Web & Mobile passionné par la création de solutions innovantes."
   }
 }

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { usePortfolioStore } from "@/stores/portfolio"; // Import usePortfolioStore
 import { useTranslation } from "react-i18next"; // Import useTranslation
 
@@ -50,15 +50,27 @@ const Navigation = () => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      // Simple scroll to element with offset
+      const navHeight = 80;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - navHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      // Close mobile menu
       setIsOpen(false);
+    } else {
+      console.warn('Element not found:', sectionId);
     }
   };
 
   return (
     <>
       <motion.nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ${
           scrolled
             ? "bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-[#1a1a1a]"
             : "bg-transparent"
@@ -67,8 +79,8 @@ const Navigation = () => {
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
             <motion.div
               className="flex items-center gap-2 cursor-pointer"
@@ -83,7 +95,7 @@ const Navigation = () => {
                 />
               ) : (
                 <div className="w-10 h-10 bg-gradient-to-br from-[#0066ff] to-[#8b5cf6] rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+                  <User className="w-5 h-5 text-white" />
                 </div>
               )}
               {!logoUrl && ( // Only show text if no logo image is present
@@ -153,27 +165,46 @@ const Navigation = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="md:hidden bg-[#0a0a0a]/98 backdrop-blur-xl border-t border-[#1a1a1a]"
+              className="md:hidden fixed inset-0 top-[60px] bg-[#0a0a0a]/98 backdrop-blur-xl border-t border-[#1a1a1a] z-[9998]"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="px-6 py-4 space-y-2">
+              <div className="px-4 sm:px-6 py-4 space-y-2 max-h-[80vh] overflow-y-auto">
                 {navItems.map(item => (
                   <motion.button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className={`block w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`block w-full text-left px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                       activeSection === item.id
                         ? "text-[#0066ff] bg-[#0066ff]/10"
                         : "text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a]"
                     }`}
                     whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {item.label}
                   </motion.button>
                 ))}
+                {/* Language Switcher - Mobile */}
+                <div className="flex items-center gap-4 pt-4 border-t border-[#333] mt-4">
+                  <button
+                    onClick={() => i18n.changeLanguage('en')}
+                    className={`text-sm font-medium ${i18n.language === 'en' ? 'text-[#0066ff]' : 'text-[#a1a1aa]'}`}
+                    aria-label="Switch to English"
+                  >
+                    EN
+                  </button>
+                  <span className="text-[#71717a]">|</span>
+                  <button
+                    onClick={() => i18n.changeLanguage('fr')}
+                    className={`text-sm font-medium ${i18n.language === 'fr' ? 'text-[#0066ff]' : 'text-[#a1a1aa]'}`}
+                    aria-label="Switch to French"
+                  >
+                    FR
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}

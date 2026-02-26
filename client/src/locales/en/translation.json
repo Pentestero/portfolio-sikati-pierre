@@ -114,6 +114,8 @@
     "projects": "Projects",
     "aboutMe": "About Me",
     "myJourney": "My Journey",
+    "myStory": "My Story",
+    "myMotivations": "My Motivations",
     "discoverMyStory": "Discover my story, my motivations and my vision for the technological future in Africa",
     "myVision": "My Vision",
     "availableForCollaboration": "Available for collaboration",
@@ -146,6 +148,7 @@
     "security": "Security",
     "ml": "ML/AI",
     "featured": "Featured",
+    "featured": "Featured",
     "contactMeSection": "Contact Me",
     "contactFormSuccess": "Message sent successfully!",
     "contactFormError": "Failed to send message: {{errorMessage}}",
@@ -171,6 +174,9 @@
     "contact": "Contact"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved."
+    "allRightsReserved": "All rights reserved.",
+    "quickLinks": "Quick Links",
+    "followMe": "Follow Me",
+    "description": "Passionate Web & Mobile Developer creating innovative solutions."
   }
 }
