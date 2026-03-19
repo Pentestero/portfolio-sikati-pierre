@@ -11,13 +11,19 @@ const Footer = () => {
     ? (contactInfo.github_url.startsWith("http://") || contactInfo.github_url.startsWith("https://")
       ? contactInfo.github_url
       : `https://${contactInfo.github_url}`)
-    : "https://github.com/sikati";
+    : "";
   const linkedinUrl = contactInfo?.linkedin_url
     ? (contactInfo.linkedin_url.startsWith("http://") || contactInfo.linkedin_url.startsWith("https://")
       ? contactInfo.linkedin_url
       : `https://${contactInfo.linkedin_url}`)
-    : "https://linkedin.com/in/sikati-pierre";
-  const email = contactInfo?.email || "sikati.pierre@example.com";
+    : "";
+  const email = contactInfo?.email || "";
+
+  const socialLinks = [
+    { icon: Github, href: githubUrl, show: !!githubUrl },
+    { icon: Linkedin, href: linkedinUrl, show: !!linkedinUrl },
+    { icon: Mail, href: email ? `mailto:${email}` : "", show: !!email },
+  ].filter(link => link.show);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -46,19 +52,19 @@ const Footer = () => {
                 <img
                   src={profile.avatar_url}
                   alt="Avatar"
-                  className="w-10 h-10 rounded-full object-cover border-2 border-[#0066ff]"
+                  className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg"
                   loading="lazy"
                 />
               ) : (
-                <div className="w-10 h-10 bg-gradient-to-br from-[#0066ff] to-[#8b5cf6] rounded-xl flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-[#1a1a1a] to-[#262626] rounded-xl flex items-center justify-center border border-white/10 shadow-lg">
+                  <User className="w-5 h-5 text-[#0066ff]" />
                 </div>
               )}
               <span
                 className="text-white font-bold text-lg sm:text-xl"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                {profile?.full_name || "SIKATI"}
+                {profile?.full_name || ""}
               </span>
             </div>
             <p className="text-[#71717a] text-sm">
@@ -102,37 +108,30 @@ const Footer = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-center"
           >
-            <h4 className="text-white font-semibold mb-4">{t("footer.followMe")}</h4>
-            <div className="flex gap-3 justify-center">
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-[#1a1a1a] rounded-lg flex items-center justify-center text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white transition-all"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-[#1a1a1a] rounded-lg flex items-center justify-center text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white transition-all"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href={`mailto:${email}`}
-                className="w-10 h-10 bg-[#1a1a1a] rounded-lg flex items-center justify-center text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white transition-all"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
-            </div>
+            {socialLinks.length > 0 && (
+              <>
+                <h4 className="text-white font-semibold mb-4">{t("footer.followMe")}</h4>
+                <div className="flex gap-3 justify-center">
+                  {socialLinks.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link.href}
+                      target={link.href.startsWith("mailto") ? undefined : "_blank"}
+                      rel={link.href.startsWith("mailto") ? undefined : "noopener noreferrer"}
+                      className="w-10 h-10 bg-[#1a1a1a] rounded-lg flex items-center justify-center text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white transition-all"
+                    >
+                      <link.icon className="w-5 h-5" />
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
           </motion.div>
 
         {/* Bottom */}
         <div className="pt-6 sm:pt-8 border-t border-[#1a1a1a] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[#52525b] text-xs sm:text-sm text-center md:text-left">
-            © {new Date().getFullYear()} {profile?.full_name || "Pierre Sikati"}. Tous droits réservés.
+            © {new Date().getFullYear()} {profile?.full_name || ""}. {t("footer.allRightsReserved")}
           </p>
           <motion.button
             onClick={scrollToTop}

@@ -12,6 +12,7 @@ const Navigation = () => {
   const { t, i18n } = useTranslation(); // Initialize useTranslation
 
   const logoUrl = profile?.avatar_url; // Use avatar_url as logo if available
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const navItems = [
     { id: "hero", label: t("navigation.home") },
@@ -24,6 +25,10 @@ const Navigation = () => {
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(progress);
 
       const sections = navItems.map(item => item.id);
       const scrollPosition = window.scrollY + 100;
@@ -79,6 +84,9 @@ const Navigation = () => {
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
       >
+        {/* Scroll Progress Bar */}
+        <div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 transition-all duration-300" style={{ width: `${scrollProgress}%` }} />
+        
         <div className="max-w-7xl mx-auto px-3 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
@@ -91,11 +99,11 @@ const Navigation = () => {
                 <img
                   src={logoUrl}
                   alt={profile?.full_name || t("common.welcome")} // Translated alt text
-                  className="w-10 h-10 rounded-xl object-cover"
+                  className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg"
                 />
               ) : (
-                <div className="w-10 h-10 bg-gradient-to-br from-[#0066ff] to-[#8b5cf6] rounded-xl flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-[#1a1a1a] to-[#262626] rounded-xl flex items-center justify-center border border-white/10 shadow-lg">
+                  <User className="w-5 h-5 text-[#0066ff]" />
                 </div>
               )}
               {!logoUrl && ( // Only show text if no logo image is present
@@ -103,7 +111,7 @@ const Navigation = () => {
                   className="text-white font-bold text-xl"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  {profile?.full_name?.split(' ')[0] || "SIKATI"}
+                  {profile?.full_name?.split(' ')[0] || ""}
                 </span>
               )}
             </motion.div>
@@ -114,15 +122,22 @@ const Navigation = () => {
                 <motion.button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`relative px-4 py-2 rounded-lg text-sm font-black uppercase tracking-widest transition-all duration-300 ${
                     activeSection === item.id
-                      ? "text-[#0066ff] bg-[#0066ff]/10"
-                      : "text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a]"
+                      ? "text-blue-500 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   {item.label}
+                  {activeSection === item.id && (
+                    <motion.div
+                      layoutId="nav-glow"
+                      className="absolute inset-0 rounded-lg border border-blue-500/50 blur-[2px]"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
                 </motion.button>
               ))}
               {/* Language Switcher */}

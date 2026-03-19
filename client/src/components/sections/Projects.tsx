@@ -20,86 +20,15 @@ import { useTranslation } from "react-i18next"; // Import useTranslation
 import { decodeHtmlEntities } from "@/lib/utils"; // Import decodeHtmlEntities
 
 const Projects = () => {
-  const { projects: storeProjects } = usePortfolioStore();
+  const { projects: storeProjects, isLoading } = usePortfolioStore();
   const [filter, setFilter] = useState("all");
-  const { t } = useTranslation(); // Initialize useTranslation
+  const { t } = useTranslation();
 
-  const defaultProjects = [
-    {
-      id: "1",
-      title: "Plateforme E-Learning",
-      description:
-        "Application web complète pour l'éducation en ligne avec gestion des cours, paiements mobiles et suivi de progression.",
-      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-      category: "web",
-      github_url: "https://github.com/sikati/elearning-platform",
-      demo_url: "https://elearning-demo.vercel.app",
-      featured: true,
-      order_index: 1,
-    },
-    {
-      id: "2",
-      title: "App Mobile Santé Plus",
-      description:
-        "Application mobile pour la prise de rendez-vous médicaux et téléconsultation au Cameroun.",
-      technologies: ["React Native", "Firebase", "Redux"],
-      category: "mobile",
-      github_url: "https://github.com/sikati/sante-plus-app",
-      demo_url: "https://expo.dev/@sikati/sante-plus",
-      featured: true,
-      order_index: 2,
-    },
-    {
-      id: "3",
-      title: "Réseau Sécurisé PME",
-      description:
-        "Architecture réseau complète avec sécurité avancée pour PME camerounaises.",
-      technologies: ["Cisco", "Linux", "VPN", "Pare-feu"],
-      category: "network",
-      github_url: "https://github.com/sikati/pme-network-security",
-      demo_url: null,
-      featured: false,
-      order_index: 3,
-    },
-    {
-      id: "4",
-      title: "Security Audit Tool",
-      description:
-        "Outil d'audit de sécurité automatisé pour applications web avec rapports détaillés.",
-      technologies: ["Python", "Burp Suite", "Kali Linux"],
-      category: "security",
-      github_url: "https://github.com/sikati/security-audit-tool",
-      demo_url: null,
-      featured: false,
-      order_index: 4,
-    },
-    {
-      id: "5",
-      title: "ML Predictive Analytics",
-      description:
-        "Modèle de machine learning pour prédiction des tendances du marché camerounais.",
-      technologies: ["Python", "Scikit-learn", "TensorFlow", "Pandas"],
-      category: "ml",
-      github_url: "https://github.com/sikati/ml-predictive-analytics",
-      demo_url: null,
-      featured: false,
-      order_index: 5,
-    },
-    {
-      id: "6",
-      title: "Portfolio Moderne",
-      description:
-        "Portfolio personnel moderne et responsive avec animations et design attractif.",
-      technologies: ["React", "Tailwind", "Framer Motion"],
-      category: "web",
-      github_url: "https://github.com/sikati/portfolio",
-      demo_url: null,
-      featured: true,
-      order_index: 6,
-    },
-  ];
+  if (!isLoading && storeProjects.length === 0) {
+    return null;
+  }
 
-  const projects = storeProjects.length > 0 ? storeProjects : defaultProjects;
+  const projects = storeProjects;
 
   const categories = [
     { id: "all", label: t("home.all"), icon: Filter },
@@ -222,72 +151,64 @@ const Projects = () => {
                   key={project.id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   whileHover={{ scale: 1.02, y: -5 }}
+                  className="relative group h-full"
                 >
-                  <Card className="bg-[#1a1a1a] border-[#333] h-full hover:border-[#0066ff]/50 transition-all duration-300 group hover:shadow-xl hover:shadow-[#0066ff]/10 overflow-hidden">
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${getCategoryColor(project.category)} rounded-3xl blur opacity-10 group-hover:opacity-100 transition duration-500`}></div>
+                  <Card className="relative bg-[#0f0f0f] border-white/5 h-full transition-all duration-300 overflow-hidden rounded-3xl p-0">
                     {/* Card Image/Header */}
-                    <div className="relative h-32 sm:h-40 overflow-hidden">
+                    <div className="relative h-40 overflow-hidden">
                       {project.image_url ? (
                         <img
                           src={project.image_url}
                           alt={project.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy" // Lazy loading for project images
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          loading="lazy"
                         />
                       ) : (
                         <div
                           className={`w-full h-full bg-gradient-to-br ${getCategoryColor(project.category)}`}
                         />
                       )}
-                      <div className="absolute inset-0 bg-black/20" /> {/* Overlay for text readability */}
-                      <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                      <div className="absolute top-4 right-4">
                         {project.featured && (
-                          <Badge className="bg-white/20 backdrop-blur text-white text-xs">
+                          <Badge className="bg-blue-500 text-white border-none text-[10px] font-black uppercase">
                             {t("home.featured")}
                           </Badge>
                         )}
                       </div>
-                      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10"> {/* Position category icon and badge */}
-                        <div className="w-10 sm:w-14 h-10 sm:h-14 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
-                          <CategoryIcon className="w-5 sm:w-7 h-5 sm:h-7 text-white" />
+                      <div className="absolute top-4 left-4 z-10">
+                        <div className="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-2 border border-white/10 group-hover:scale-110 transition-transform">
+                          <CategoryIcon className="w-6 h-6 text-white" />
                         </div>
-                        <Badge className="bg-white/20 backdrop-blur text-white text-xs capitalize">
-                          {project.category}
-                        </Badge>
                       </div>
                     </div>
 
-                    <CardContent className="p-4 sm:p-5">
-                      <CardTitle className="text-base sm:text-lg text-white mb-1 sm:mb-2 line-clamp-1 break-words">
+                    <CardContent className="p-6">
+                      <CardTitle className="text-xl font-black text-white mb-2 line-clamp-1 break-words tracking-tight">
                         {project.title}
                       </CardTitle>
-                      <p className="text-[#71717a] text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3 break-words">
+                      <p className="text-gray-400 text-sm mb-6 line-clamp-3 leading-relaxed">
                         {decodeHtmlEntities(project.description)}
                       </p>
 
-                      {/* Technologies */}
-                      <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+                      <div className="flex flex-wrap gap-2 mb-6">
                         {(project.technologies || [])
                           .slice(0, 3)
                           .map((tech: string, i: number) => (
                             <span
                               key={i}
-                              className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-[#262626] text-[#a1a1aa] text-xs rounded"
+                              className="px-2 py-1 bg-white/5 text-gray-400 text-[10px] font-bold rounded-lg border border-white/5 uppercase tracking-widest"
                             >
                               {tech}
                             </span>
                           ))}
-                        {(project.technologies || []).length > 3 && (
-                          <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-[#262626] text-[#0066ff] text-xs rounded">
-                            +{(project.technologies || []).length - 3}
-                          </span>
-                        )}
                       </div>
 
-                      {/* Links */}
                       <div className="flex gap-2">
                         {project.github_url && (
                           <a
@@ -299,9 +220,9 @@ const Projects = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full border-[#333] text-[#a1a1aa] hover:bg-[#0066ff] hover:text-white hover:border-[#0066ff] text-xs sm:text-sm"
+                              className="w-full border-white/10 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl text-xs font-black uppercase"
                             >
-                              <Github className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" /> {t("common.code")}
+                              <Github className="w-4 h-4 mr-2" /> {t("common.code")}
                             </Button>
                           </a>
                         )}
@@ -314,10 +235,10 @@ const Projects = () => {
                           >
                             <Button
                               size="sm"
-                              className="w-full bg-[#0066ff] hover:bg-[#0052cc] text-xs sm:text-sm"
+                              className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-blue-600/20"
                             >
                               {t("common.demo")}{" "}
-                              <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
+                              <ExternalLink className="w-4 h-4 ml-2" />
                             </Button>
                           </a>
                         )}

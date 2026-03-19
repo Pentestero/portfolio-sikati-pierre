@@ -17,14 +17,14 @@ const Hero = () => {
   const { profile, contactInfo } = usePortfolioStore();
   const { t } = useTranslation();
 
-  const heroTitle = profile?.full_name || "PIERRE SIKATI MBARGA";
+  const heroTitle = profile?.full_name || "";
   
   const getHeroDescValue = (): string => {
     try {
       const heroDescValue = profile?.hero_description;
       
       if (!heroDescValue) {
-        return t("home.heroDescription");
+        return "";
       }
       
       let text = "";
@@ -37,7 +37,7 @@ const Hero = () => {
       }
       
       if (typeof text !== "string" || !text) {
-        return t("home.heroDescription");
+        return "";
       }
       
       return text
@@ -49,7 +49,7 @@ const Hero = () => {
         .replace(/&gt;/g, ">");
     } catch (error) {
       console.error("Error getting hero description:", error);
-      return t("home.heroDescription");
+      return "";
     }
   };
   
@@ -57,14 +57,14 @@ const Hero = () => {
   const heroCtaPrimary = t("home.collaborateOnProject");
   const heroCtaSecondary = t("home.viewMyProjects");
 
-  const githubUrl = contactInfo?.github_url || "https://github.com/sikati";
+  const githubUrl = contactInfo?.github_url || "";
   const linkedinUrl = contactInfo?.linkedin_url
     ? contactInfo.linkedin_url.startsWith("http://") ||
       contactInfo.linkedin_url.startsWith("https://")
       ? contactInfo.linkedin_url
       : `https://${contactInfo.linkedin_url}`
-    : "https://linkedin.com/in/sikati-pierre";
-  const email = contactInfo?.email || "sikati.pierre@example.com";
+    : "";
+  const email = contactInfo?.email || "";
   const avatarUrl = profile?.avatar_url;
   const cvUrl = profile?.cv_url;
 
@@ -163,22 +163,24 @@ const Hero = () => {
         />
         
         {/* Floating particles */}
-        {[...Array(5)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-[#0066ff]/30 rounded-full"
+            className="absolute w-1 h-1 bg-blue-500/20 rounded-full"
             initial={{
-              x: Math.random() * 1000,
-              y: Math.random() * 1000,
+              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
             }}
             animate={{
-              y: [0, -100, 0],
-              opacity: [0, 1, 0],
+              y: [0, -200, 0],
+              x: [0, Math.random() * 100 - 50, 0],
+              opacity: [0, 0.4, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 5 + Math.random() * 5,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: Math.random() * 5,
+              ease: "easeInOut"
             }}
           />
         ))}
@@ -207,34 +209,37 @@ const Hero = () => {
                 className="relative"
               >
                 {avatarUrl ? (
-                  <motion.img
-                    src={avatarUrl}
-                    alt={profile?.full_name || t("common.welcome")}
-                    className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-[#0066ff]/30 shadow-2xl mx-auto"
-                    style={{
-                      boxShadow: "0 20px 40px rgba(0, 102, 255, 0.3)",
-                    }}
-                  />
+                  <div className="relative group inline-block">
+                    <motion.div
+                      className="absolute -inset-3 bg-gradient-to-r from-[#0066ff] to-[#8b5cf6] rounded-3xl blur-xl opacity-10 group-hover:opacity-30 transition-opacity duration-700"
+                    />
+                    <div className="relative z-10 bg-[#1a1a1a] rounded-3xl p-1 border-2 border-white/10 shadow-2xl overflow-hidden">
+                      <motion.img
+                        src={avatarUrl}
+                        alt={profile?.full_name || t("common.welcome")}
+                        className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 object-contain rounded-2xl mx-auto"
+                        style={{
+                          filter: "drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5))",
+                        }}
+                      />
+                    </div>
+                  </div>
                 ) : (
                   <motion.div
-                    className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full bg-gradient-to-br from-[#0066ff] to-[#8b5cf6] flex items-center justify-center border-4 border-[#0066ff]/30 shadow-2xl mx-auto"
-                    style={{
-                      boxShadow: "0 20px 40px rgba(0, 102, 255, 0.3)",
-                    }}
+                    className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 rounded-3xl bg-gradient-to-br from-[#1a1a1a] to-[#262626] flex items-center justify-center border-2 border-white/10 shadow-2xl mx-auto relative z-10"
                   >
-                    <User className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+                    <User className="w-16 h-16 sm:w-24 sm:h-24 text-[#0066ff]" />
                   </motion.div>
                 )}
               </motion.div>
               
               {/* Online indicator with glow */}
               <motion.div
-                className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2"
+                className="absolute -bottom-2 -right-2 z-20"
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <div className="w-4 h-4 sm:w-5 sm:h-5 bg-[#10b981] rounded-full border-4 border-[#0a0a0a]" />
-                <div className="absolute inset-0 w-4 h-4 sm:w-5 sm:h-5 bg-[#10b981] rounded-full animate-ping opacity-75" />
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#10b981] rounded-full border-4 border-[#0a0a0a] shadow-lg shadow-[#10b981]/40" />
               </motion.div>
             </motion.div>
           </div>
@@ -259,19 +264,29 @@ const Hero = () => {
         {/* Main Title - 3D Text Effect */}
         <motion.h1
           variants={itemVariants}
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 text-white leading-tight px-2"
+          className="text-4xl sm:text-5xl md:text-7xl font-black mb-4 text-white leading-tight px-2 tracking-tighter"
           style={{ 
             fontFamily: "'Playfair Display', serif",
-            textShadow: "0 4px 20px rgba(0, 102, 255, 0.3)",
+            textShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
           }}
         >
-          {heroTitle}
+          {heroTitle.split(" ").map((word, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+              className="inline-block mr-3"
+            >
+              {word}
+            </motion.span>
+          ))}
         </motion.h1>
 
         {/* Description */}
         <motion.p
           variants={itemVariants}
-          className="text-xs sm:text-sm md:text-base text-[#71717a] mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed px-3 sm:px-4"
+          className="text-base sm:text-lg md:text-xl text-blue-100/60 mb-8 max-w-2xl mx-auto leading-relaxed px-3 sm:px-4 font-medium"
         >
           {heroDescription}
         </motion.p>
@@ -283,14 +298,17 @@ const Hero = () => {
         >
           <motion.div whileHover={{ y: -5 }} whileTap={{ scale: 0.98 }}>
             <Button
-              className="bg-gradient-to-r from-[#0066ff] to-[#0052cc] hover:from-[#0052cc] hover:to-[#003d99] text-white px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-lg w-full sm:w-auto max-w-[280px]"
-              style={{
-                boxShadow: "0 10px 30px rgba(0, 102, 255, 0.3)",
-              }}
+              className="relative bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white px-5 py-3 text-[0.7rem] font-black uppercase tracking-wider rounded-xl w-full sm:w-auto max-w-[300px] shadow-lg shadow-blue-600/20 overflow-hidden"
               onClick={() => scrollToSection("contact")}
             >
               {heroCtaPrimary}
               <ArrowDown className="ml-2 w-4 h-4" />
+              {/* Pulsating Glow */}
+              <motion.span 
+                className="absolute inset-0 rounded-xl bg-blue-500 blur-lg opacity-30"
+                animate={{ opacity: [0, 0.4, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
             </Button>
           </motion.div>
           
@@ -320,37 +338,40 @@ const Hero = () => {
         </motion.div>
 
         {/* Social Links - 3D Icons */}
-        <motion.div
-          variants={itemVariants}
-          className="flex gap-3 sm:gap-4 justify-center items-center"
-        >
-          {[
-            { icon: Github, href: githubUrl, label: "GitHub" },
-            { icon: Linkedin, href: linkedinUrl, label: "LinkedIn" },
-            { icon: Mail, href: `mailto:${email}`, label: "Email" },
-          ].map((item, index) => (
-            <motion.a
-              key={index}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-[#1a1a1a] border border-[#333] flex items-center justify-center text-[#a1a1aa] hover:bg-[#0066ff] hover:border-[#0066ff] hover:text-white transition-all"
-              initial={{ opacity: 0, y: 20, rotateX: -45 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ delay: 0.5 + index * 0.1 }}
-              whileHover={{
-                scale: 1.15,
-                rotateY: 15,
-                z: 10,
-              }}
-              whileTap={{ scale: 0.95 }}
-              aria-label={item.label}
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </motion.a>
-          ))}
-        </motion.div>
+        {(githubUrl || linkedinUrl || email) && (
+          <motion.div
+            variants={itemVariants}
+            className="flex gap-3 sm:gap-4 justify-center items-center"
+          >
+            {[
+              { icon: Github, href: githubUrl, label: "GitHub", show: !!githubUrl },
+              { icon: Linkedin, href: linkedinUrl, label: "LinkedIn", show: !!linkedinUrl },
+              { icon: Mail, href: email ? `mailto:${email}` : "", label: "Email", show: !!email },
+            ].filter(item => item.show).map((item, index) => (
+              <motion.a
+                key={index}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 overflow-hidden"
+                initial={{ opacity: 0, y: 20, rotateX: -45 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ delay: 0.5 + index * 0.1 }}
+                whileHover={{
+                  scale: 1.15,
+                  rotateY: 15,
+                  z: 10,
+                }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={item.label}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                <item.icon className="w-6 h-6 relative z-10" />
+              </motion.a>
+            ))}
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Scroll indicator */}

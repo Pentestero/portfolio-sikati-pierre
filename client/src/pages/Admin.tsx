@@ -8,7 +8,6 @@ import {
 } from "react";
 import { motion } from "framer-motion";
 import { usePortfolioStore } from "@/stores/portfolio";
-import { portfolioData } from "@/data/portfolio";
 import {
   Card,
   CardContent,
@@ -321,25 +320,7 @@ export default function Admin() {
     technologies_count: profile?.technologies_count || "",
     years_experience: profile?.years_experience || "",
     certifications_count: profile?.certifications_count || "",
-    highlighted_sections: (() => {
-      const defaultSections = portfolioData.about.highlightedSections
-        .filter(s => s.id !== "vision") // Remove vision from default
-        .map(s => ({
-          ...s,
-          id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-        }));
-
-      if (profile?.highlighted_sections) {
-        // Filter out vision and remap IDs from profile data
-        return profile.highlighted_sections
-          .filter(s => s.id !== "vision")
-          .map(s => ({
-            ...s,
-            id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-          }));
-      }
-      return defaultSections;
-    })(),
+    highlighted_sections: profile?.highlighted_sections || [],
   });
   const [contactForm, setContactForm] = useState({
     email: contactInfo?.email || "",
@@ -823,20 +804,13 @@ export default function Admin() {
 
   const handleSaveProfile = async () => {
     try {
-      // Transform highlighted_sections before saving
-      const transformedHighlightedSections = profileForm.highlighted_sections?.map(s => {
-        // Ensure IDs are "myStory", "myMotivations" before saving
-        const newId = s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id;
-        return { ...s, id: newId };
-      }).filter(s => s.id !== "vision"); // Explicitly filter out vision
-
       // Convert translation fields to JSON format
       const profileDataToSave = {
         ...profileForm,
         bio: { fr: profileForm.bio } as any,
         vision_text: { fr: profileForm.vision_text } as any,
         hero_description: { fr: profileForm.hero_description } as any,
-        highlighted_sections: transformedHighlightedSections as any,
+        highlighted_sections: profileForm.highlighted_sections as any,
       };
 
       await updateProfile(profileDataToSave as any);
@@ -1376,22 +1350,7 @@ export default function Admin() {
                                   profile?.years_experience || "",
                                 certifications_count:
                                   profile?.certifications_count || "",
-                                highlighted_sections: (() => {
-                                  if (profile?.highlighted_sections) {
-                                    return profile.highlighted_sections
-                                      .filter(s => s.id !== "vision")
-                                      .map(s => ({
-                                        ...s,
-                                        id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-                                      }));
-                                  }
-                                  return portfolioData.about.highlightedSections
-                                    .filter(s => s.id !== "vision")
-                                    .map(s => ({
-                                      ...s,
-                                      id: s.id === "story" ? "myStory" : s.id === "motivations" ? "myMotivations" : s.id,
-                                    }));
-                                })(),
+                                highlighted_sections: profile?.highlighted_sections || [],
                               });
                               setEditingProfile(true);
                             }}

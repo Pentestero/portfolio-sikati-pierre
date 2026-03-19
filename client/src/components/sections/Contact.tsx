@@ -58,60 +58,65 @@ const Contact = () => {
     }
   };
 
-  const displayEmail = contactInfo?.email || "sikati.pierre@example.com";
-  const displayPhone = contactInfo?.phone || "+237 XXX XXX XXX";
-  const displayLocation = contactInfo?.location || t("home.locationLabel"); // Translated fallback
+  const displayEmail = contactInfo?.email || "";
+  const displayPhone = contactInfo?.phone || "";
+  const displayLocation = contactInfo?.location || "";
   const displayGithubUrl = contactInfo?.github_url
     ? contactInfo.github_url.startsWith("http://") ||
       contactInfo.github_url.startsWith("https://")
       ? contactInfo.github_url
       : `https://${contactInfo.github_url}`
-    : "https://github.com/sikati";
+    : "";
   const displayLinkedinUrl = contactInfo?.linkedin_url
     ? contactInfo.linkedin_url.startsWith("http://") ||
       contactInfo.linkedin_url.startsWith("https://")
       ? contactInfo.linkedin_url
       : `https://${contactInfo.linkedin_url}`
-    : "https://linkedin.com/in/sikati-pierre";
+    : "";
 
   const contactItems = [
     {
       icon: Mail,
-      label: t("home.emailLabel"), // Translated label
+      label: t("home.emailLabel"),
       value: displayEmail,
-      href: `mailto:${displayEmail}`,
+      href: displayEmail ? `mailto:${displayEmail}` : "",
       color: "from-[#0066ff] to-[#0052cc]",
+      show: !!displayEmail
     },
     {
       icon: Phone,
-      label: t("home.phoneLabel"), // Translated label
+      label: t("home.phoneLabel"),
       value: displayPhone,
-      href: `tel:${displayPhone}`,
+      href: displayPhone ? `tel:${displayPhone}` : "",
       color: "from-[#10b981] to-[#059669]",
+      show: !!displayPhone
     },
     {
       icon: MapPin,
-      label: t("home.locationLabel"), // Translated label
+      label: t("home.locationLabel"),
       value: displayLocation,
       href: "#",
       color: "from-[#f59e0b] to-[#d97706]",
+      show: !!displayLocation
     },
-  ];
+  ].filter(item => item.show);
 
   const socialItems = [
     {
       icon: Github,
-      label: t("home.githubLabel"), // Translated label
+      label: t("home.githubLabel"),
       href: displayGithubUrl,
       color: "from-[#333] to-[#1a1a1a]",
+      show: !!displayGithubUrl
     },
     {
       icon: Linkedin,
-      label: t("home.linkedinLabel"), // Translated label
+      label: t("home.linkedinLabel"),
       href: displayLinkedinUrl,
       color: "from-[#0077b5] to-[#005885]",
+      show: !!displayLinkedinUrl
     },
-  ];
+  ].filter(item => item.show);
 
   return (
     <section
@@ -157,27 +162,29 @@ const Contact = () => {
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            className="relative group"
           >
-            <Card className="bg-[#1a1a1a] border-[#333] h-full">
-              <CardContent className="p-5 sm:p-8">
-                <div className="flex items-center gap-3 mb-5 sm:mb-6">
-                  <div className="w-10 h-10 bg-[#0066ff]/10 rounded-xl flex items-center justify-center">
-                    <MessageCircle className="w-5 h-5 text-[#0066ff]" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur opacity-10 group-hover:opacity-30 transition duration-1000"></div>
+            <Card className="relative bg-[#0f0f0f] border-white/5 h-full rounded-3xl overflow-hidden">
+              <CardContent className="p-6 sm:p-10">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+                    <MessageCircle className="w-6 h-6 text-blue-500" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white">
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">
                     {t("home.sendMessage")}
                   </h3>
                 </div>
 
-                <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-[#a1a1aa] mb-2">
+                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                         {t("home.yourName")}
                       </label>
                       <Input
                         type="text"
-                        className="bg-[#262626] border-[#333] text-white placeholder-[#52525b] focus:border-[#0066ff]"
+                        className="bg-[#161616] border-white/5 text-white placeholder-gray-700 focus:border-blue-500/50 h-12 rounded-xl transition-all"
                         placeholder={t("home.yourName")}
                         value={name}
                         onChange={e => setName(e.target.value)}
@@ -185,12 +192,12 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-[#a1a1aa] mb-2">
+                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                         {t("home.emailLabel")}
                       </label>
                       <Input
                         type="email"
-                        className="bg-[#262626] border-[#333] text-white placeholder-[#52525b] focus:border-[#0066ff]"
+                        className="bg-[#161616] border-white/5 text-white placeholder-gray-700 focus:border-blue-500/50 h-12 rounded-xl transition-all"
                         placeholder={t("home.yourEmail")}
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -200,12 +207,12 @@ const Contact = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[#a1a1aa] mb-2">
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                       {t("home.subject")}
                     </label>
                     <Input
                       type="text"
-                      className="bg-[#262626] border-[#333] text-white placeholder-[#52525b] focus:border-[#0066ff]"
+                      className="bg-[#161616] border-white/5 text-white placeholder-gray-700 focus:border-blue-500/50 h-12 rounded-xl transition-all"
                       placeholder={t("home.subject")}
                       value={subject}
                       onChange={e => setSubject(e.target.value)}
@@ -214,12 +221,12 @@ const Contact = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[#a1a1aa] mb-2">
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
                       {t("home.yourMessage")}
                     </label>
                     <Textarea
-                      rows={4}
-                      className="bg-[#262626] border-[#333] text-white placeholder-[#52525b] focus:border-[#0066ff] resize-none"
+                      rows={5}
+                      className="bg-[#161616] border-white/5 text-white placeholder-gray-700 focus:border-blue-500/50 rounded-xl transition-all resize-none"
                       placeholder={t("home.yourMessage")}
                       value={message}
                       onChange={e => setMessage(e.target.value)}
@@ -228,19 +235,26 @@ const Contact = () => {
                   </div>
 
                   <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     className="w-full"
                   >
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#0066ff] to-[#0052cc] hover:from-[#0052cc] hover:to-[#003d99] text-white py-3 sm:py-3.5 font-semibold"
-                      disabled={isSubmitting} // Disable during submission
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-14 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 transition-all"
+                      disabled={isSubmitting}
                     >
-                      <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      {isSubmitting
-                        ? t("common.sending")
-                        : t("home.sendMessageBtn")}
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          {t("common.sending")}
+                        </div>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5 mr-3" />
+                          {t("home.sendMessageBtn")}
+                        </>
+                      )}
                     </Button>
                   </motion.div>
                 </form>
